@@ -74,7 +74,7 @@ searchButton.addEventListener('click', function () {
             const modalDetailButton = document.querySelectorAll('.modal-detail-button');
             modalDetailButton.forEach(btn => {
                 btn.addEventListener('.click', function () {
-                    fetch(`http://www.omdbapi.com/?apikey=9433029a&i=${imdbid}`)
+                    fetch(`http://www.omdbapi.com/?apikey=9433029a&i=${this.dataset.imdbid}`)
                         .then(res => res.json())
                         .then(movdet => {
                             const movieDetail = showMovieDetail(movdet);
