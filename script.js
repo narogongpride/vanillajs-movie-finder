@@ -1,4 +1,4 @@
-// Tampilkan modal ketika tombol Details diklik (Bootstrap v4)
+// showing modals when Details button in cards was clicked (Bootstrap v4)
 const myModal = document.getElementById('movieDetailModal')
 const myInput = document.getElementById('myInput')
 
@@ -24,30 +24,30 @@ const showCards = movie => {
             </div>`;
 };
 
-// element movie detail yang mengisi modal
-const showMovieDetail = movdet => {
+// filling modal with this element
+const showMovieDetail = dataMD => {
     return `<div class="container-fluid">
                 <div class="row">
                     <div class="col-md-3">
-                        <img src=${movdet.Poster} class="img-fluid">
+                        <img src=${dataMD.Poster} class="img-fluid">
                     </div>
                     <div class="col-md">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <h4>${movdet.Title} (${movdet.Year})</h4>
+                                <h4>${dataMD.Title} (${dataMD.Year})</h4>
                             </li>
                             <li class="list-group-item">
-                                <strong>Director: </strong>${movdet.Director}
+                                <strong>Director: </strong>${dataMD.Director}
                             </li>
                             <li class="list-group-item">
-                                <strong>Actors: </strong>${movdet.Actors}
+                                <strong>Actors: </strong>${dataMD.Actors}
                             </li>
                             <li class="list-group-item">
-                                <strong>Writer: </strong>${movdet.Writer}
+                                <strong>Writer: </strong>${dataMD.Writer}
                             </li>
                             <li class="list-group-item">
                                 <strong>Plot: </strong>
-                                <br>${movdet.Plot}
+                                <br>${dataMD.Plot}
                             </li>
                         </ul>
                     </div>
@@ -56,35 +56,42 @@ const showMovieDetail = movdet => {
 };
 
 const searchButton = document.querySelector('.search-button');
-
-searchButton.addEventListener('click', function () {
-    const searchKeyword = document.querySelector('.input-keyword');
-
-    fetch(`http://www.omdbapi.com/?apikey=9433029a&s=${searchKeyword.value}`)
-        .then(response => response.json())
-        .then(response => {
-            const movies = response.Search;
-            let cards = '';
-            movies.forEach(m => cards += showCards(m));
-            const movieContainer = document.querySelector('.movie-container');
-            movieContainer.innerHTML = cards;
-
-
-            // detail button clicked
-            const modalDetailButton = document.querySelectorAll('.modal-detail-button');
-            modalDetailButton.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    console.log(this);
-                    const imdbid = this.dataset.imdbid;
-                    fetch(`http://www.omdbapi.com/?apikey=9433029a&i=${imdbid}`)
-                        .then(response => response.json())
-                        .then(md => {
-                            const movieDetail = showMovieDetail(md);
-                            const modalBody = document.querySelector('.modal-body');
-                            modalBody.innerHTML = movieDetail;
-                        });
-                })
-            });
-        });
+searchButton.addEventListener('click', async function () {
+    const inputKeyword = document.querySelector('.input-keyword');
+    const movies = await fetchMovies(inputKeyword.value);
+    updateMovies(movies);
 });
 
+// Binding function
+document.addEventListener('click', async function (el) {
+    if (el.target.classList.contains('modal-detail-button')) {
+        const imdbid = el.target.dataset.imdbid;
+        const movieDetail = await getMovieDetail(imdbid);
+        updateMovieDetail(movieDetail);
+    }
+});
+
+const getMovieDetail = imdbid => {
+    return fetch(`http://www.omdbapi.com/?apikey=9433029a&i=${imdbid}`)
+        .then(response => response.json())
+        .then(dataMD => dataMD);
+};
+
+const updateMovieDetail = dataMD => {
+    const movieDetail = showMovieDetail(dataMD);
+    const modalBody = document.querySelector('.modal-body');
+    modalBody.innerHTML = movieDetail;
+};
+
+const fetchMovies = keyword => {
+    return fetch(`http://www.omdbapi.com/?apikey=9433029a&s=${keyword}`)
+        .then(response => response.json())
+        .then(response => response.Search);
+};
+
+const updateMovies = movies => {
+    let cards = '';
+    movies.forEach(m => cards += showCards(m));
+    const movieContainer = document.querySelector('.movie-container');
+    movieContainer.innerHTML = cards;
+};
