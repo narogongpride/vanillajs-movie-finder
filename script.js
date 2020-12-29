@@ -89,7 +89,7 @@ searchButton.addEventListener('click', function () {
 
 
 
-// fetch pake ajax jquery
+// Ajax fetching data
 $('#myModal').on('shown.bs.modal', function () {
     $('#myInput').focus()
 })
