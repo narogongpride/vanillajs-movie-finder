@@ -1,4 +1,4 @@
-// showing modals when Details button in cards was clicked (Bootstrap v4)
+// Show modal when Details button has been clicked (Bootstrap v4)
 const myModal = document.getElementById('movieDetailModal')
 const myInput = document.getElementById('myInput')
 
@@ -6,7 +6,7 @@ myModal.addEventListener('shown.bs.modal', function () {
     myInput.focus()
 })
 
-// element movie cards
+// Movie cards element
 const showCards = movie => {
     return `<div class="col-md-4 my-3">
                 <div class="card">
@@ -24,11 +24,11 @@ const showCards = movie => {
             </div>`;
 };
 
-// filling modal with this element
+// Movie detail element (when Details button has been clicked, this stuff will be shown)
 const showMovieDetail = dataMD => {
     return `<div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-3 my-3">
                         <img src=${dataMD.Poster} class="img-fluid">
                     </div>
                     <div class="col-md">
@@ -57,36 +57,32 @@ const showMovieDetail = dataMD => {
 
 const searchButton = document.querySelector('.search-button');
 searchButton.addEventListener('click', async function () {
-    const inputKeyword = document.querySelector('.input-keyword');
-    const movies = await fetchMovies(inputKeyword.value);
-    updateMovies(movies);
-});
-
-// Binding function
-document.addEventListener('click', async function (el) {
-    if (el.target.classList.contains('modal-detail-button')) {
-        const imdbid = el.target.dataset.imdbid;
-        const movieDetail = await getMovieDetail(imdbid);
-        updateMovieDetail(movieDetail);
+    try {
+        const inputKeyword = document.querySelector('.input-keyword');
+        const movies = await fetchMovies(inputKeyword.value);
+        updateMovies(movies);
+    } catch (error) {
+        console.log(error);
     }
 });
 
-const getMovieDetail = imdbid => {
-    return fetch(`http://www.omdbapi.com/?apikey=9433029a&i=${imdbid}`)
-        .then(response => response.json())
-        .then(dataMD => dataMD);
-};
-
-const updateMovieDetail = dataMD => {
-    const movieDetail = showMovieDetail(dataMD);
-    const modalBody = document.querySelector('.modal-body');
-    modalBody.innerHTML = movieDetail;
-};
-
+// Fetching keyword result
 const fetchMovies = keyword => {
     return fetch(`http://www.omdbapi.com/?apikey=9433029a&s=${keyword}`)
-        .then(response => response.json())
-        .then(response => response.Search);
+        .then(response => {
+            if (response.ok === false) {
+                throw new Error(response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(response => {
+            if (response.Response === "False") {
+                throw new Error(response.Error);
+            }
+
+            return response.Search;
+        });
 };
 
 const updateMovies = movies => {
@@ -95,3 +91,48 @@ const updateMovies = movies => {
     const movieContainer = document.querySelector('.movie-container');
     movieContainer.innerHTML = cards;
 };
+
+
+// Binding function
+document.addEventListener('click', async function (el) {
+    try {
+        if (el.target.classList.contains('modal-detail-button')) {
+            const imdbid = el.target.dataset.imdbid;
+            const movieDetail = await fetchMovieDetail(imdbid);
+            updateMovieDetail(movieDetail);
+        }
+    } catch (err) {
+        alert('Details will not found, better luck next time.');
+    }
+
+});
+
+const fetchMovieDetail = imdbid => {
+    return fetch(`http://www.omdbapi.com/?apikey=9433029a&i=${imdbid}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(dataMD => {
+            if (dataMD.Response === "False") {
+                throw new Error(dataMD.Error)
+            }
+
+            return dataMD;
+        });
+};
+
+const updateMovieDetail = dataMD => {
+    const movieDetail = showMovieDetail(dataMD);
+    const modalBody = document.querySelector('.modal-body');
+    modalBody.innerHTML = movieDetail;
+};
+
+
+
+// fetch('http://api.aladhan.com/v1/timingsByAddress?address=surabaya')
+//     .then(response => response.json())
+//     .then(response => console.log(response))
