@@ -131,8 +131,3 @@ const updateMovieDetail = dataMD => {
     modalBody.innerHTML = movieDetail;
 };
 
-
-
-// fetch('http://api.aladhan.com/v1/timingsByAddress?address=surabaya')
-//     .then(response => response.json())
-//     .then(response => console.log(response))
